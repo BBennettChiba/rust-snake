@@ -3,7 +3,7 @@ extern crate rand;
 mod draw;
 mod game;
 mod snake;
-use draw::{draw_rectangle, to_coord_u32};
+use draw::to_coord_u32;
 use piston_window::types::Color;
 use piston_window::*;
 
@@ -20,15 +20,12 @@ fn main() {
     let mut game = Game::new(width, height);
     while let Some(event) = window.next() {
         if let Some(Button::Keyboard(key)) = event.press_args() {
-            //game.key_pressed(key)
+            game.key_pressed(key)
         };
 
         window.draw_2d(&event, |c, g, _| {
             clear(BACK_COLOR, g);
-            //game.draw(&c, g);
-            let mut draw_state = DrawState::new_alpha();
-            let text = Text::new(20);
-            text.draw("Hello, world!", &mut c, &c.draw_state, c.transform, g);
+            game.draw(&c, g);
         });
 
         event.update(|arg| game.update(arg.dt));
