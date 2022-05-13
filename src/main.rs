@@ -1,3 +1,4 @@
+extern crate find_folder;
 extern crate piston_window;
 extern crate rand;
 mod draw;
@@ -7,28 +8,44 @@ use draw::to_coord_u32;
 use game::Game;
 use piston_window::types::Color;
 use piston_window::*;
-use std::env;
 
 const BACK_COLOR: Color = [0.5, 0.5, 0.5, 1.0];
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    match args.len() {
-        0 | 1 | 2 => panic!("Not enough args"),
-        _ => (),
-    };
-    println!("{:?}", args);
-    let width = match args[1].parse::<i32>() {
-        Ok(num) => num,
-        Err(e) => panic!("{}", e),
-    };
-    let height = match args[2].parse::<i32>() {
-        Ok(num) => num,
-        Err(e) => panic!("{}", e),
-    };
-    if height < 10 || width < 10 {
-        panic!("dimensions are too small")
+    let (width, height) = (40, 40);
+    let mut window: PistonWindow = WindowSettings::new("start scren", [200, 200])
+        .exit_on_esc(true)
+        //.opengl(OpenGL::V2_1) // Set a different OpenGl version
+        .build()
+        .unwrap();
+
+    let assets = find_folder::Search::ParentsThenKids(3, 3)
+        .for_folder("assets")
+        .unwrap();
+    let mut glyphs = window
+        .load_font(assets.join("FiraSans-Regular.ttf"))
+        .unwrap();
+
+    window.set_lazy(true);
+    while let Some(e) = window.next() {
+        window.draw_2d(&e, |c, g, device| {
+            let transform = c.transform.trans(10.0, 100.0);
+
+            clear([0.0, 0.0, 0.0, 1.0], g);
+            text::Text::new_color([0.0, 1.0, 0.0, 1.0], 32)
+                .draw(
+                    "choose size please",
+                    &mut glyphs,
+                    &c.draw_state,
+                    transform,
+                    g,
+                )
+                .unwrap();
+
+            // Update glyphs before rendering.
+            glyphs.factory.encoder.flush(device);
+        });
     }
-    start_game((width, height))
+    start_game((width, height));
 }
 
 fn start_game(dimensions: (i32, i32)) {
